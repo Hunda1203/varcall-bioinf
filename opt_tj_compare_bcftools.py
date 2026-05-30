@@ -1,6 +1,6 @@
 import csv
 
-read_type = "ecoli"
+read_type = input("Input read type (ecoli or lambda): ")
 
 my_file = read_type + "_calls.csv"
 bcf_file = read_type + "_bcftools.vcf"
@@ -48,26 +48,39 @@ def load_bcftools_calls(path):
     return calls
 
 
-my_calls = load_my_calls(my_file)
-bcftools_calls = load_bcftools_calls(bcf_file)
+found = load_my_calls(my_file)
+ground_truth = load_bcftools_calls(bcf_file)
 
-same = my_calls & bcftools_calls
-only_mine = my_calls - bcftools_calls
-only_bcftools = bcftools_calls - my_calls
+matched_mine = set()
+matched_bcftools = set()
 
-precision = len(same) / len(my_calls) if my_calls else 0
-recall = len(same) / len(bcftools_calls) if bcftools_calls else 0
+for i, my_call in enumerate(found):
+    for j, bcf_call in enumerate(ground_truth):
+        if j in matched_bcftools:
+            continue
+
+        if my_call == bcf_call:
+            matched_mine.add(i)
+            matched_bcftools.add(j)
+            break
+
+tp = matched_mine
+fp = set(range(len(found))) - matched_mine
+fn = set(range(len(ground_truth))) - matched_bcftools
+
+precision = len(tp) / len(found) if found else 0
+recall = len(tp) / len(ground_truth) if ground_truth else 0
 
 if precision + recall > 0:
     f1 = 2 * precision * recall / (precision + recall)
 else:
     f1 = 0
 
-print("My calls:", len(my_calls))
-print("bcftools calls:", len(bcftools_calls))
-print("Same:", len(same))
-print("Only mine:", len(only_mine))
-print("Only bcftools:", len(only_bcftools))
-print("Precision:", precision)
-print("Recall:", recall)
-print("F1:", f1)
+print(f"Ground truth:       {len(ground_truth)}")
+print(f"Found:              {len(found)}")
+print(f"True positives:     {len(tp)}")
+print(f"False positives:    {len(fp)}")
+print(f"False negatives:    {len(fn)}")
+print(f"Precision:          {precision:.4f}")
+print(f"Recall:             {recall:.4f}")
+print(f"F1:                 {f1:.4f}")

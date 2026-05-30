@@ -241,8 +241,8 @@ def run_pipeline():
             steps.append(("Comparing results with 'mpileup.txt' file", f"printf '{read_type}\\n' | python3 tj_compare_mpileup.py", "comparison_mpileup"))
 
         elif comparer_var.get() == "both":
-            steps.append(("Comparing results with 'mutated.csv' file", f"printf '{read_type}\\n' | python3 tj_eval.py", "comparison_key"))
-            steps.append(("Comparing results with 'mpileup.txt' file", f"printf '{read_type}\\n' | python3 tj_compare_mpileup.py", "comparison_mpileup"))
+            steps.append((f"Comparing results with '{read_type}_mutated.csv' file", f"printf '{read_type}\\n' | python3 tj_eval.py", "comparison_key"))
+            steps.append((f"Comparing results with '{read_type}_mpileup.txt' file", f"printf '{read_type}\\n' | python3 tj_compare_mpileup.py", "comparison_mpileup"))
 
     if not steps:
         write_output("No steps selected.\n")
@@ -270,10 +270,10 @@ def run_pipeline():
         results.append((label, success))
 
         if step_type == "comparison_key":
-            comparison_outputs.append(("Comparison with 'mutated.csv' file", output))
+            comparison_outputs.append((f"Comparison with '{read_type}_mutated.csv' file", output))
 
         if step_type == "comparison_mpileup":
-            comparison_outputs.append(("Comparison with 'mpileup.txt' file", output))
+            comparison_outputs.append((f"Comparison with '{read_type}_mpileup.txt' file", output))
 
         if not success:
             timer_running = False
